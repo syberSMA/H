@@ -1,0 +1,12 @@
+{
+  "name": "stecy-source-grabber",
+  "version": "1.0.0",
+  "description": "Web URL Source Code Extractor (HTML + CSS + Assets + Single-File Bundler)",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}

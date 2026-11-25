@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>StecyGrab — Web Source Code &amp; CSS Extractor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+  <style>
+    :root {
+      --bg-base: #0b0e14;
+      --bg-surface: #121722;
+      --bg-elevated: #18202f;
+      --bg-input: #0e131c;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: #3b82f6;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body.modal-open {
+      overflow: hidden;
+    }
+
+    /* Header */
+    .topbar {
+      background: rgba(18, 23, 34, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .topbar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .engine-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    /* Search / URL Input Card */
+    .grab-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .grab-header {
+      margin-bottom: 16px;
+    }
+
+    .grab-header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .grab-header p {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+    }
+
+    .url-form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .input-wrap {
+      flex: 1;
+      min-width: 260px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap i {
+      position: absolute;
+      left: 14px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .url-input {
+      width: 100%;
+      height: 46px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0 42px 0 40px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      outline: none;
+      transition: border-color 0.2s;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .url-input:focus {
+      border-color: var(--border-active);
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      font-size: 13px;
+      display: none;
+    }
+
+    .clear-btn.visible {
+      display: block;
+    }
+
+    .btn {
+      height: 46px;
+      padding: 0 20px;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--bg-elevated);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #212b3f;
+    }
+
+    .btn-sm {
+      height: 36px;
+      padding: 0 13px;
+      font-size: 12.5px;
+      border-radius: var(--radius-sm);
+    }
+
+    .quick-options {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .preset-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .preset-chip {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .preset-chip:hover {
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Alert / Error Box */
+    .alert-box {
+      display: none;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      margin-bottom: 20px;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .alert-box.show {
+      display: flex;
+    }
+
+    /* Loading Skeleton */
+    .loader-box {
+      display: none;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 44px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .loader-box.show {
+      display: block;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Results Section */
+    .results-area {
+      display: none;
+    }
+
+    .results-area.show {
+      display: block;
+    }
+
+    /* Stats Bar */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+
+    .stat-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 17px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-primary);
+    }
+
+    /* Workspace Panel */
+    .workspace {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .workspace-toolbar {
+      padding: 12px 16px;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      padding: 7px 13px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .tab-btn.active {
+      background: var(--bg-surface);
+      border-color: var(--border-subtle);
+      color: var(--text-primary);
+    }
+
+    .tab-badge {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Code Viewer */
+    .pane {
+      display: none;
+    }
+
+    .pane.active {
+      display: block;
+    }
+
+    .code-header-info {
+      padding: 10px 16px;
+      background: rgba(11, 14, 20, 0.6);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-secondary);
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .code-editor {
+      width: 100%;
+      height: 540px;
+      background: #090c12;
+      color: #e2e8f0;
+      border: none;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      resize: vertical;
+      outline: none;
+      tab-size: 2;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* Live Preview Iframe */
+    .preview-frame {
+      width: 100%;
+      height: 600px;
+      border: none;
+      background: #ffffff;
+      display: block;
+    }
+
+    /* Assets List */
+    .assets-box {
+      padding: 18px;
+      max-height: 560px;
+      overflow-y: auto;
+    }
+
+    .asset-group-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .asset-list {
+      list-style: none;
+      margin-bottom: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .asset-item {
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      word-break: break-all;
+    }
+
+    .asset-item a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .asset-item a:hover {
+      text-decoration: underline;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 11px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      transform: translateY(120%);
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 100;
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* API Docs Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.72);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 90;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-dialog {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      max-width: 640px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 22px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .modal-head h2 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .code-snippet {
+      background: #090c12;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #93c5fd;
+      overflow-x: auto;
+      margin: 10px 0 16px;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 32px;
+    }
+  </style>
+</head>
+<body oncontextmenu="return false;">
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-code"></i>
+        </div>
+        <div>
+          <div class="brand-title">StecyGrab</div>
+          <div class="brand-sub">HTML &amp; CSS Source Code Extractor</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <button class="btn btn-secondary btn-sm" id="openApiModalBtn">
+          <i class="fa-solid fa-plug"></i> API Endpoint
+        </button>
+        <div class="engine-badge" id="engineStatusBadge">
+          <span class="status-dot"></span>
+          <span id="engineModeText">Hybrid Engine Ready</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- URL Input Form -->
+    <section class="grab-card">
+      <div class="grab-header">
+        <h1>Ambil Source Code HTML + CSS Lengkap</h1>
+        <p>Tempelkan link URL website target untuk mengekstrak struktur HTML, seluruh file CSS eksternal/inline, serta bundel siap pakai.</p>
+      </div>
+
+      <form class="url-form" id="grabForm">
+        <div class="input-wrap">
+          <i class="fa-solid fa-link"></i>
+          <input
+            type="url"
+            id="urlInput"
+            class="url-input"
+            placeholder="https://example.com"
+            required
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="button" class="clear-btn" id="clearInputBtn" title="Hapus URL">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <i class="fa-solid fa-bolt"></i> Get Source Code
+        </button>
+      </form>
+
+      <div class="quick-options">
+        <div class="preset-links">
+          <span>Contoh cepat:</span>
+          <button type="button" class="preset-chip" data-url="https://example.com">example.com</button>
+          <button type="button" class="preset-chip" data-url="https://info.cern.ch">info.cern.ch</button>
+          <button type="button" class="preset-chip" data-url="https://httpbin.org/html">httpbin.org/html</button>
+        </div>
+        <div>
+          <i class="fa-solid fa-shield-halved"></i> Auto-resolve relative URL &amp; CSS assets
+        </div>
+      </div>
+    </section>
+
+    <!-- Error Alert -->
+    <div class="alert-box" id="errorBox">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span id="errorText">Terjadi kesalahan saat memproses URL.</span>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loader-box" id="loaderBox">
+      <div class="spinner"></div>
+      <div style="font-weight:600; margin-bottom:4px;">Sedang menarik HTML &amp; mengompilasi CSS...</div>
+      <div style="font-size:13px; color:var(--text-secondary);" id="loaderSub">Menghubungi server target &amp; mengurai stylesheet</div>
+    </div>
+
+    <!-- Results Workspace -->
+    <section class="results-area" id="resultsArea">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label">Target Domain</div>
+          <div class="stat-value" id="statDomain" style="font-size:14px; overflow:hidden; text-overflow:ellipsis;">-</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Ukuran HTML</div>
+          <div class="stat-value" id="statHtmlSize">0 KB</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Ukuran Total CSS</div>
+          <div class="stat-value" id="statCssSize">0 KB</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Stylesheet Ditemukan</div>
+          <div class="stat-value" id="statSheetsCount">0</div>
+        </div>
+      </div>
+
+      <!-- Editor & Preview -->
+      <div class="workspace">
+        <div class="workspace-toolbar">
+          <div class="tabs">
+            <button type="button" class="tab-btn active" data-tab="single">
+              <i class="fa-solid fa-file-code"></i> HTML + CSS (All-in-One)
+            </button>
+            <button type="button" class="tab-btn" data-tab="html">
+              <i class="fa-brands fa-html5"></i> HTML Raw
+            </button>
+            <button type="button" class="tab-btn" data-tab="css">
+              <i class="fa-brands fa-css3-alt"></i> CSS Lengkap
+              <span class="tab-badge" id="cssTabBadge">0</span>
+            </button>
+            <button type="button" class="tab-btn" data-tab="preview">
+              <i class="fa-solid fa-eye"></i> Live Preview
+            </button>
+            <button type="button" class="tab-btn" data-tab="assets">
+              <i class="fa-solid fa-layer-group"></i> Assets &amp; Links
+            </button>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="btn btn-secondary btn-sm" id="formatBtn">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Rapikan
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" id="copyBtn">
+              <i class="fa-regular fa-copy"></i> Copy Kode
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="downloadBtn">
+              <i class="fa-solid fa-download"></i> Download File
+            </button>
+          </div>
+        </div>
+
+        <!-- Pane 1: Single File HTML + CSS -->
+        <div class="pane active" id="pane-single">
+          <div class="code-header-info">
+            <span><i class="fa-solid fa-circle-info"></i> Gabungan HTML + seluruh CSS eksternal yang sudah di-inline ke dalam tag &lt;style&gt;. Tinggal salin &amp; jalankan!</span>
+            <span id="singleLineCount">0 baris</span>
+          </div>
+          <textarea class="code-editor" id="codeSingle" readonly spellcheck="false"></textarea>
+        </div>
+
+        <!-- Pane 2: HTML Raw -->
+        <div class="pane" id="pane-html">
+          <div class="code-header-info">
+            <span><i class="fa-solid fa-code"></i> Struktur dokumen HTML asli dengan path asset absolut.</span>
+            <span id="htmlLineCount">0 baris</span>
+          </div>
+          <textarea class="code-editor" id="codeHtml" readonly spellcheck="false"></textarea>
+        </div>
+
+        <!-- Pane 3: CSS Lengkap -->
+        <div class="pane" id="pane-css">
+          <div class="code-header-info">
+            <span><i class="fa-solid fa-palette"></i> Gabungan seluruh file CSS eksternal (&lt;link rel="stylesheet"&gt;) dan tag &lt;style&gt;.</span>
+            <span id="cssLineCount">0 baris</span>
+          </div>
+          <textarea class="code-editor" id="codeCss" readonly spellcheck="false"></textarea>
+        </div>
+
+        <!-- Pane 4: Live Preview -->
+        <div class="pane" id="pane-preview">
+          <div class="code-header-info">
+            <span><i class="fa-solid fa-desktop"></i> Pratinjau hasil ekstraksi desain (Sandbox Mode)</span>
+            <button type="button" class="btn btn-secondary btn-sm" id="openNewTabPreviewBtn">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Buka di Tab Baru
+            </button>
+          </div>
+          <iframe class="preview-frame" id="previewFrame" sandbox="allow-same-origin"></iframe>
+        </div>
+
+        <!-- Pane 5: Assets -->
+        <div class="pane" id="pane-assets">
+          <div class="assets-box">
+            <div class="asset-group-title">
+              <i class="fa-brands fa-css3-alt"></i> External Stylesheets (<span id="assetCssCount">0</span>)
+            </div>
+            <ul class="asset-list" id="assetCssList"></ul>
+
+            <div class="asset-group-title">
+              <i class="fa-brands fa-js"></i> External Scripts (<span id="assetJsCount">0</span>)
+            </div>
+            <ul class="asset-list" id="assetJsList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      web Developer : HAMDI &bull; StecyGrab Source Extractor
+    </footer>
+  </main>
+
+  <!-- API Documentation Modal -->
+  <div class="modal-backdrop" id="apiModal">
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <h2><i class="fa-solid fa-terminal"></i> Dokumentasi REST API</h2>
+        <button type="button" class="modal-close" id="closeApiModalBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <p style="font-size:13.5px; color:var(--text-secondary); margin-bottom:10px;">
+        Gunakan endpoint bawaan aplikasi ini untuk mengambil source code HTML + CSS dalam format JSON dari aplikasi lain:
+      </p>
+      <div class="code-snippet" id="apiEndpointExample">GET /api/scrape?url=https://example.com</div>
+      <p style="font-size:13px; color:var(--text-secondary);">Contoh pemanggilan via JavaScript Fetch:</p>
+      <div class="code-snippet">fetch('/api/scrape?url=' + encodeURIComponent('https://example.com'))
+  .then(res =&gt; res.json())
+  .then(data =&gt; {
+    console.log(data.html);           // HTML lengkap
+    console.log(data.css);            // Gabungan seluruh CSS
+    console.log(data.singleFileHtml); // HTML + CSS All-in-One
+  });</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">
+    <i class="fa-solid fa-circle-check" style="color:var(--success);"></i>
+    <span id="toastText">Berhasil disalin ke clipboard!</span>
+  </div>
+
+  <script>
+    const grabForm = document.getElementById('grabForm');
+    const urlInput = document.getElementById('urlInput');
+    const clearInputBtn = document.getElementById('clearInputBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorBox = document.getElementById('errorBox');
+    const errorText = document.getElementById('errorText');
+    const loaderBox = document.getElementById('loaderBox');
+    const loaderSub = document.getElementById('loaderSub');
+    const resultsArea = document.getElementById('resultsArea');
+    const engineModeText = document.getElementById('engineModeText');
+
+    // Textareas
+    const codeSingle = document.getElementById('codeSingle');
+    const codeHtml = document.getElementById('codeHtml');
+    const codeCss = document.getElementById('codeCss');
+    const previewFrame = document.getElementById('previewFrame');
+
+    // State
+    let currentTab = 'single';
+    let currentData = null;
+
+    // Update API example URL dynamically
+    document.getElementById('apiEndpointExample').textContent =
+      `GET ${window.location.origin}/api/scrape?url=https://example.com`;
+
+    // Input clear button toggle
+    urlInput.addEventListener('input', () => {
+      clearInputBtn.classList.toggle('visible', urlInput.value.length > 0);
+    });
+
+    clearInputBtn.addEventListener('click', () => {
+      urlInput.value = '';
+      clearInputBtn.classList.remove('visible');
+      urlInput.focus();
+    });
+
+    // Preset chips
+    document.querySelectorAll('.preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        urlInput.value = chip.dataset.url;
+        clearInputBtn.classList.add('visible');
+        grabForm.dispatchEvent(new Event('submit'));
+      });
+    });
+
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        currentTab = btn.dataset.tab;
+        document.getElementById(`pane-${currentTab}`).classList.add('active');
+      });
+    });
+
+    // Toast helper
+    let toastTimer;
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastText').textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
+    }
+
+    // Format bytes
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    // Simple HTML/CSS beautifier
+    function beautifyHtml(html) {
+      let formatted = '';
+      const reg = /(>)(<)(\/*)/g;
+      html = html.replace(reg, '$1\n$2$3');
+      let pad = 0;
+      html.split('\n').forEach((node) => {
+        let indent = 0;
+        if (node.match(/.+<\/\w[^>]*>$/)) {
+          indent = 0;
+        } else if (node.match(/^<\/\w/)) {
+          if (pad !== 0) pad -= 1;
+        } else if (node.match(/^<\w[^>]*[^\/]>.*$/)) {
+          indent = 1;
+        }
+        formatted += '  '.repeat(pad) + node.trim() + '\n';
+        pad += indent;
+      });
+      return formatted.trim();
+    }
+
+    // Client-side fallback scraper (if deployed on static hosting like GitHub Pages without Node/Vercel API)
+    async function clientFallbackScrape(targetUrl) {
+      engineModeText.textContent = 'Client Proxy Mode';
+      loaderSub.textContent = 'Menggunakan Public CORS Proxy (Static Mode)...';
+
+      const parsedUrl = new URL(targetUrl);
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(parsedUrl.href)}`;
+      const res = await fetch(proxyUrl);
+      if (!res.ok) throw new Error('Gagal terhubung ke proxy publik.');
+      const json = await res.json();
+      if (!json.contents) throw new Error('Konten kosong dari URL target.');
+
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(json.contents, 'text/html');
+
+      const resolveUrl = (rel) => {
+        if (!rel || rel.startsWith('data:') || rel.startsWith('#') || rel.startsWith('javascript:')) return rel;
+        try { return new URL(rel, parsedUrl.href).href; } catch { return rel; }
+      };
+
+      doc.querySelectorAll('[src]').forEach(el => el.setAttribute('src', resolveUrl(el.getAttribute('src'))));
+      doc.querySelectorAll('[href]').forEach(el => el.setAttribute('href', resolveUrl(el.getAttribute('href'))));
+
+      let inlineCss = [];
+      doc.querySelectorAll('style').forEach((el, idx) => {
+        if (el.textContent.trim()) {
+          inlineCss.push(`/* === INLINE STYLE #${idx + 1} === */\n${el.textContent.trim()}`);
+        }
+      });
+
+      const sheetLinks = Array.from(doc.querySelectorAll('link[rel="stylesheet"]'))
+        .map(el => el.getAttribute('href'))
+        .filter(href => href && href.startsWith('http'));
+
+      const externalCss = [];
+      for (const sheetUrl of sheetLinks.slice(0, 8)) {
+        try {
+          const cssRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(sheetUrl)}`);
+          const cssJson = await cssRes.json();
+          if (cssJson.contents) {
+            externalCss.push(`/* === EXTERNAL CSS: ${sheetUrl} === */\n${cssJson.contents}`);
+          }
+        } catch {}
+      }
+
+      const combinedCss = [...externalCss, ...inlineCss].join('\n\n');
+      const resolvedHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+
+      const docClone = parser.parseFromString(resolvedHtml, 'text/html');
+      docClone.querySelectorAll('link[rel="stylesheet"]').forEach(el => el.remove());
+      if (combinedCss.trim()) {
+        const styleEl = docClone.createElement('style');
+        styleEl.textContent = '\n' + combinedCss + '\n';
+        docClone.head.appendChild(styleEl);
+      }
+      const singleFileHtml = '<!DOCTYPE html>\n' + docClone.documentElement.outerHTML;
+
+      const scripts = Array.from(doc.querySelectorAll('script[src]')).map(el => el.getAttribute('src'));
+
+      return {
+        success: true,
+        url: parsedUrl.href,
+        domain: parsedUrl.hostname,
+        stats: {
+          htmlBytes: new Blob([resolvedHtml]).size,
+          cssBytes: new Blob([combinedCss]).size,
+          externalSheetsCount: sheetLinks.length,
+          inlineStylesCount: inlineCss.length,
+          scriptsCount: scripts.length
+        },
+        html: resolvedHtml,
+        css: combinedCss,
+        singleFileHtml,
+        stylesheets: sheetLinks,
+        scripts
+      };
+    }
+
+    // Form Submit Handler
+    grabForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let rawUrl = urlInput.value.trim();
+      if (!rawUrl) return;
+      if (!/^https?:\/\//i.test(rawUrl)) {
+        rawUrl = 'https://' + rawUrl;
+        urlInput.value = rawUrl;
+      }
+
+      errorBox.classList.remove('show');
+      resultsArea.classList.remove('show');
+      loaderBox.classList.add('show');
+      submitBtn.disabled = true;
+      loaderSub.textContent = 'Menghubungi Serverless API /api/scrape...';
+
+      try {
+        let data;
+        try {
+          const apiRes = await fetch(`/api/scrape?url=${encodeURIComponent(rawUrl)}`);
+          const contentType = apiRes.headers.get('content-type') || '';
+          if (apiRes.ok && contentType.includes('application/json')) {
+            data = await apiRes.json();
+            engineModeText.textContent = 'Serverless API Active';
+          } else if (contentType.includes('application/json')) {
+            const errJson = await apiRes.json();
+            throw new Error(errJson.error || 'API Error');
+          } else {
+            // Fallback when /api/scrape is not mounted (e.g., GitHub Pages)
+            data = await clientFallbackScrape(rawUrl);
+          }
+        } catch (apiErr) {
+          // If network/404 on /api/scrape, try client fallback
+          if (apiErr.message.includes('Target server') || apiErr.message.includes('Format URL')) {
+            throw apiErr;
+          }
+          data = await clientFallbackScrape(rawUrl);
+        }
+
+        currentData = data;
+        renderResults(data);
+      } catch (err) {
+        errorText.textContent = err.message || 'Gagal mengambil source code dari URL tersebut.';
+        errorBox.classList.add('show');
+      } finally {
+        loaderBox.classList.remove('show');
+        submitBtn.disabled = false;
+      }
+    });
+
+    function renderResults(data) {
+      document.getElementById('statDomain').textContent = data.domain || '-';
+      document.getElementById('statHtmlSize').textContent = formatBytes(data.stats.htmlBytes);
+      document.getElementById('statCssSize').textContent = formatBytes(data.stats.cssBytes);
+      document.getElementById('statSheetsCount').textContent =
+        `${data.stats.externalSheetsCount} ext / ${data.stats.inlineStylesCount} in`;
+
+      document.getElementById('cssTabBadge').textContent =
+        data.stats.externalSheetsCount + data.stats.inlineStylesCount;
+
+      codeSingle.value = data.singleFileHtml || '';
+      codeHtml.value = data.html || '';
+      codeCss.value = data.css || '/* Tidak ada CSS ditemukan */';
+
+      updateLineCounts();
+
+      // Update Live Preview iframe
+      previewFrame.srcdoc = data.singleFileHtml || data.html;
+
+      // Render Assets list
+      const cssList = document.getElementById('assetCssList');
+      const jsList = document.getElementById('assetJsList');
+      cssList.innerHTML = '';
+      jsList.innerHTML = '';
+
+      document.getElementById('assetCssCount').textContent = (data.stylesheets || []).length;
+      document.getElementById('assetJsCount').textContent = (data.scripts || []).length;
+
+      if ((data.stylesheets || []).length === 0) {
+        cssList.innerHTML = '<li class="asset-item" style="color:var(--text-muted);">Tidak ada external stylesheet</li>';
+      } else {
+        data.stylesheets.forEach(link => {
+          const li = document.createElement('li');
+          li.className = 'asset-item';
+          li.innerHTML = `<a href="${link}" target="_blank" rel="noopener">${link}</a>`;
+          cssList.appendChild(li);
+        });
+      }
+
+      if ((data.scripts || []).length === 0) {
+        jsList.innerHTML = '<li class="asset-item" style="color:var(--text-muted);">Tidak ada external script</li>';
+      } else {
+        data.scripts.forEach(link => {
+          const li = document.createElement('li');
+          li.className = 'asset-item';
+          li.innerHTML = `<a href="${link}" target="_blank" rel="noopener">${link}</a>`;
+          jsList.appendChild(li);
+        });
+      }
+
+      resultsArea.classList.add('show');
+      showToast('Source code HTML + CSS berhasil diambil!');
+    }
+
+    function updateLineCounts() {
+      document.getElementById('singleLineCount').textContent = `${codeSingle.value.split('\n').length} baris`;
+      document.getElementById('htmlLineCount').textContent = `${codeHtml.value.split('\n').length} baris`;
+      document.getElementById('cssLineCount').textContent = `${codeCss.value.split('\n').length} baris`;
+    }
+
+    // Format / Beautify current tab
+    document.getElementById('formatBtn').addEventListener('click', () => {
+      if (!currentData) return;
+      if (currentTab === 'single') {
+        codeSingle.value = beautifyHtml(codeSingle.value);
+      } else if (currentTab === 'html') {
+        codeHtml.value = beautifyHtml(codeHtml.value);
+      } else if (currentTab === 'css') {
+        codeCss.value = codeCss.value
+          .replace(/\{/g, ' {\n  ')
+          .replace(/;/g, ';\n  ')
+          .replace(/\}/g, '\n}\n');
+      }
+      updateLineCounts();
+      showToast('Kode berhasil dirapikan!');
+    });
+
+    // Copy active code
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      if (!currentData) return;
+      let textToCopy = codeSingle.value;
+      if (currentTab === 'html') textToCopy = codeHtml.value;
+      if (currentTab === 'css') textToCopy = codeCss.value;
+
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        showToast('Kode berhasil disalin ke clipboard!');
+      } catch {
+        showToast('Gagal menyalin, silakan salin manual.');
+      }
+    });
+
+    // Download file
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      if (!currentData) return;
+      let content = codeSingle.value;
+      let filename = `${currentData.domain || 'website'}-bundle.html`;
+      let mime = 'text/html';
+
+      if (currentTab === 'html') {
+        content = codeHtml.value;
+        filename = `${currentData.domain || 'website'}-raw.html`;
+      } else if (currentTab === 'css') {
+        content = codeCss.value;
+        filename = `${currentData.domain || 'website'}-styles.css`;
+        mime = 'text/css';
+      }
+
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      showToast(`Mengunduh ${filename}`);
+    });
+
+    // Open preview in new tab
+    document.getElementById('openNewTabPreviewBtn').addEventListener('click', () => {
+      if (!currentData) return;
+      const blob = new Blob([currentData.singleFileHtml || currentData.html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    });
+
+    // API Modal Controls (with background scroll lock)
+    const apiModal = document.getElementById('apiModal');
+    document.getElementById('openApiModalBtn').addEventListener('click', () => {
+      apiModal.classList.add('open');
+      document.body.classList.add('modal-open');
+    });
+    document.getElementById('closeApiModalBtn').addEventListener('click', () => {
+      apiModal.classList.remove('open');
+      document.body.classList.remove('modal-open');
+    });
+    apiModal.addEventListener('click', (e) => {
+      if (e.target === apiModal) {
+        apiModal.classList.remove('open');
+        document.body.classList.remove('modal-open');
+      }
+    });
+  </script>
+</body>
+</html>
